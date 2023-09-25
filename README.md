@@ -11,8 +11,8 @@ git clone https://github.com/LuisAGuzmanI/TC3007C-Equipo2-Backend.git
 
 2. **Create a Virtual Environment** (Optional but recommended)
 ```
-python -m venv venv
-source venv/bin/activate # On Windows, use: venv\Scripts\activate
+python -m venv env
+source env/bin/activate # On Windows, use: venv\Scripts\activate
 ```
 
 3. **Install Requirements**
