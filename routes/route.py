@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from models.todos import Todo
+from models.users import User
 from config.database import collection_name
 from schema.schemas import list_serial
 from bson import ObjectId
@@ -14,13 +14,13 @@ async def get_todos():
     return todos
 # Post
 @router.post("/")
-async def post_todo(todo: Todo):
-    collection_name.insert_one(dict(todo))
+async def post_todo(user: User):
+    collection_name.insert_one(dict(user))
 
 # Put
 @router.put("/{id}")
-async def put_todo(id: str, todo: Todo):
-    collection_name.find_one_and_update({"_id": ObjectId(id)}, {"$set": dict(todo)})
+async def put_todo(id: str, user: User):
+    collection_name.find_one_and_update({"_id": ObjectId(id)}, {"$set": dict(user)})
 
 # Delete
 @router.delete("/{id}")
