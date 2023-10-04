@@ -3,6 +3,7 @@ import cv2 as cv
 from fastapi import UploadFile, File
 from io import BytesIO
 import tempfile
+import numpy as np
 
 from AWS.s3 import upload_to_s3
 
@@ -43,19 +44,22 @@ async def video_to_face_images(dir: str, id: str, file: UploadFile = File(...)):
         faces = haar_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
 
         for (x, y, w, h) in faces:
-            # Dibujamos un rectángulo alrededor del rostro detectado
-            cv.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
-
-            # Extraemos la captura del rostro
-            face_image = frame[y:y+h, x:x+w]
-
             if image_count % 10 == 0:
+                # Dibujamos un rectángulo alrededor del rostro detectado
+                cv.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+                # Extraemos la captura del rostro
+                face_image = frame[y:y+h, x:x+w]
+                # Convertimos el arreglo de Numpy a BytesIO
+                image_bytes = BytesIO()
+                np.save(image_bytes, face_image)
+                # Resetear la posición inicial de BytesIO
+                image_bytes.seek(0)
                 # Incrementamos el contador de imágenes guardadas
                 stored_images += 1
-                print(stored_images)
-                # Establecemos la ruta de salida
-                image_filename = str(f'captured_image_{stored_images}.png')
-                upload_to_s3('users', id, face_image, image_filename)
+                # Establecemos el nombre del archivo .png
+                image_file_name = str(f'captured_image_{stored_images}.png')
+                # Subimos la imagen al bucket de S3 en AWS
+                print(upload_to_s3('users', id, image_bytes, image_file_name))
             
             image_count += 1
 
@@ -67,3 +71,5 @@ async def video_to_face_images(dir: str, id: str, file: UploadFile = File(...)):
     print("Imágenes guardadas: ", stored_images)
 
     os.unlink(temp_video_path)
+
+    return 0
