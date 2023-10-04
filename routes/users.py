@@ -5,13 +5,14 @@ from config.database import users
 from schema.schemas import list_serial
 from bson import ObjectId
 
-from AWS.s3 import upload_to_s3
+from helpers.video_to_images import video_to_face_images
 
 router = APIRouter()
 
 @router.post("/upload-profile-picture/{id}")
 async def upload_profile_picture(id: str, file: UploadFile = File(...)):
-    return upload_to_s3('users', id, file)
+    return  await video_to_face_images('users', id, file)
+    # return upload_to_s3('users', id, file)
 
 # Get
 @router.get("/")

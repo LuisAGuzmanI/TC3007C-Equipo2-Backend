@@ -1,42 +1,69 @@
-import cv2
 import os
+import cv2 as cv
+from fastapi import UploadFile, File
+from io import BytesIO
+import tempfile
 
-video_path = r'C:\Users\alber\Desktop\Alberto\Reto IA\OpenCV\Face Recognition\data\input\prueba.mp4'
+from AWS.s3 import upload_to_s3
 
-output_directory = r'C:\Users\alber\Desktop\Alberto\Reto IA\OpenCV\Face Recognition\data\train'
+async def video_to_face_images(dir: str, id: str, file: UploadFile = File(...)):
+    # Cargamos el clasificador pre-entrenado de rostros
+    haar_cascade = cv.CascadeClassifier(cv.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
-if not os.path.exists(output_directory):
-    os.makedirs(output_directory)
+    # Convertir el UploadFile a formato de bytes
+    video_bytes = await file.read()
 
-face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haar_face.xml')
+    # Crear un archivo de video temporal para guardar los bytes del video
+    temp_video_file = tempfile.NamedTemporaryFile(suffix=".mp4", delete=False)
+    temp_video_file.write(video_bytes)
 
-cap = cv2.VideoCapture(video_path)
+    # Obtenemos el nombre de archivo del video temporal
+    temp_video_path = temp_video_file.name
 
-image_count = 0
+    # Cargamos la captura de video de OpenCV
+    video_capture = cv.VideoCapture(temp_video_path)
 
-while True:
-    ret, frame = cap.read()
+    # Contador para capturar multiples frames por cada rostro detectado
+    image_count = 0
+    # Contador de imágenes guardadas
+    stored_images = 0
 
-    if not ret:
-        break
+    # Mientras el video no termine:
+    while True:
+        # Leemos un frame de la captura de video
+        ret, frame = video_capture.read()
 
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        if not ret:
+            break
 
-    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+        # Convertimos el frame a escala de grises para reconocimiento facial
+        gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
 
-    for (x, y, w, h) in faces:
-        cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+        # Detectamos posibles rostros en el frame
+        faces = haar_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
 
-        face_image = frame[y:y+h, x:x+w]
-        image_filename = os.path.join(output_directory, f'captured_image_{image_count}.png')
-        cv2.imwrite(image_filename, face_image)
+        for (x, y, w, h) in faces:
+            # Dibujamos un rectángulo alrededor del rostro detectado
+            cv.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
 
-        image_count += 1
+            # Extraemos la captura del rostro
+            face_image = frame[y:y+h, x:x+w]
 
-    cv2.imshow('Face Detection', frame)
+            if image_count % 10 == 0:
+                # Incrementamos el contador de imágenes guardadas
+                stored_images += 1
+                print(stored_images)
+                # Establecemos la ruta de salida
+                image_filename = str(f'captured_image_{stored_images}.png')
+                upload_to_s3('users', id, face_image, image_filename)
+            
+            image_count += 1
 
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+    # Cerramos las ventanas
+    video_capture.release()
+    cv.destroyAllWindows()
+    temp_video_file.close()
 
-cap.release()
-cv2.destroyAllWindows()
+    print("Imágenes guardadas: ", stored_images)
+
+    os.unlink(temp_video_path)
