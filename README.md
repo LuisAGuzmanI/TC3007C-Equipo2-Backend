@@ -11,8 +11,8 @@ git clone https://github.com/LuisAGuzmanI/TC3007C-Equipo2-Backend.git
 
 2. **Create a Virtual Environment** (Optional but recommended)
 ```
-python -m venv venv
-source venv/bin/activate # On Windows, use: venv\Scripts\activate
+python3 -m venv env
+source env/bin/activate # On Windows, use: env\Scripts\activate
 ```
 
 3. **Install Requirements**
@@ -24,8 +24,12 @@ pip install -r requirements.txt
 4. **Set Environment Variables**
 
 Create a `.env` file in the project root and set your environment variables. Example:
+
 ```
 MONGO_URI="mongodb+srv://..."
+AWS_ACCESS_KEY = '...'
+AWS_SECRET_KEY = '...'
+S3_BUCKET_NAME = '...'
 ```
 
 

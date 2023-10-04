@@ -1,12 +1,17 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, UploadFile, File
 
 from models.users import User
 from config.database import users
 from schema.schemas import list_serial
 from bson import ObjectId
 
+from AWS.s3 import upload_to_s3
 
 router = APIRouter()
+
+@router.post("/upload-profile-picture/{id}")
+async def upload_profile_picture(id: str, file: UploadFile = File(...)):
+    return upload_to_s3('users', id, file)
 
 # Get
 @router.get("/")
