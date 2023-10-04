@@ -1,10 +1,15 @@
-def individual_serial(todo) -> dict:
-    return {
-        "id": str(todo["_id"]),
-        "name": todo["name"],
-        "description": todo["description"],
-        "complete": todo["complete"],
-    }
+def individual_serial(item) -> dict:
+    item["id"]: str(item,["_id"])
+    item.pop("_id")
+    keys = list(item.keys())
+    return {key: item[key] for key in keys}
 
-def list_serial(todos) -> list:
-    return (individual_serial(todo) for todo in todos)
+# def individual_serial(user) -> dict:
+#     return {
+#         "id": str(user["_id"]),
+#         "name": user["name"],
+#         "email": user["email"],
+#     }
+
+def list_serial(items) -> list:
+    return (individual_serial(item) for item in items)
