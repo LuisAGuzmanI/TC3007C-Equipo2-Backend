@@ -59,7 +59,7 @@ async def video_to_face_images(dir: str, id: str, file: UploadFile = File(...)):
                 # Establecemos el nombre del archivo .png
                 image_file_name = str(f'captured_image_{stored_images}.png')
                 # Subimos la imagen al bucket de S3 en AWS
-                print(upload_to_s3('users', id, image_bytes, image_file_name))
+                print(upload_to_s3(dir, id, image_bytes, image_file_name))
             
             image_count += 1
 
@@ -68,8 +68,6 @@ async def video_to_face_images(dir: str, id: str, file: UploadFile = File(...)):
     cv.destroyAllWindows()
     temp_video_file.close()
 
-    print("Imágenes guardadas: ", stored_images)
-
     os.unlink(temp_video_path)
 
-    return 0
+    return {"message": "Face data saved successfully", "Amount of images": stored_images}

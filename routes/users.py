@@ -6,13 +6,18 @@ from schema.schemas import list_serial
 from bson import ObjectId
 
 from helpers.video_to_images import video_to_face_images
+from helpers.main_recognition import recognition_manager
 
 router = APIRouter()
 
 @router.post("/upload-profile-picture/{id}")
 async def upload_profile_picture(id: str, file: UploadFile = File(...)):
-    return  await video_to_face_images('users', id, file)
-    # return upload_to_s3('users', id, file)
+    return  await print(video_to_face_images('users', id, file))
+
+@router.post("/facial-recognition/{id}")
+async def post_user_dataset(id: str, file: UploadFile = File(...)):
+    return await recognition_manager('users', id)
+    # return list_serial(users.find())
 
 # Get
 @router.get("/")

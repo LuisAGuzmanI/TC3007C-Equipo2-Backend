@@ -24,3 +24,24 @@ def upload_to_s3(dir: str, id: str, file: UploadFile, file_name: str):
         return {"message": "File uploaded successfully", "s3_url": s3_url}
     except Exception as e:
         return {"error": str(e)}
+
+def get_from_s3(dir: str, id: str):
+    try:
+        # Ruta del archivo
+        file_path = f"{dir}/{id}/video-recognition" 
+
+        # Realizamos la petición para obtener el dataset correspondiente        
+        response = s3.list_objects(Bucket=bucket_name, Prefix=file_path)
+        # Se extraen las llaves de los archivos de la respuesta
+        files = [obj['Key'] for obj in response.get('Contents', [])]
+
+        # Extraemos las llaves de los archivos desde la respuesta
+        for file_key in files:
+            print(f"File found: {file_key}")
+
+        # Retornamos los archivos obtenidos
+        return files
+
+    except Exception as e:
+        print(f"Error listing files: {str(e)}")
+        return []
