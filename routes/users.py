@@ -3,7 +3,7 @@ from fastapi import APIRouter, UploadFile, File
 from models.users import User
 from config.database import users
 from schema.schemas import list_serial
-from bson import ObjectId
+from bson import ObjectId, is_valid
 
 from AWS.s3 import upload_to_s3
 
@@ -19,7 +19,7 @@ async def get_users():
     return list_serial(users.find())
 
 # Post
-@router.post("/")
+@router.post("/createUser")
 async def post_user(user: User):
     users.insert_one(dict(user))
 
