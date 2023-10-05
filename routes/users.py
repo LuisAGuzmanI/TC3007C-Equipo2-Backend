@@ -3,7 +3,7 @@ from fastapi import APIRouter, UploadFile, File
 from models.users import User
 from config.database import users
 from schema.schemas import list_serial
-from bson import ObjectId
+from bson import ObjectId, is_valid
 
 from helpers.video_to_images import video_to_face_images
 from helpers.main_recognition import recognition_manager
@@ -25,7 +25,7 @@ async def get_users():
     return list_serial(users.find())
 
 # Post
-@router.post("/")
+@router.post("/createUser")
 async def post_user(user: User):
     users.insert_one(dict(user))
 

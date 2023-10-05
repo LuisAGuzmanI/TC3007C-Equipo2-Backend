@@ -11,4 +11,4 @@ client = MongoClient(mongodb_uri, tlsCAFile=certifi.where())
 db = client["classroom-ai"]
 
 users = db["users"]
-classrooms = db["classrooms"]
+courses = db["courses"]

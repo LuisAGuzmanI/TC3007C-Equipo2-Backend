@@ -1,5 +1,5 @@
 def individual_serial(item) -> dict:
-    item["id"]: str(item,["_id"])
+    item["id"] = str(item["_id"])
     item.pop("_id")
     keys = list(item.keys())
     return {key: item[key] for key in keys}
