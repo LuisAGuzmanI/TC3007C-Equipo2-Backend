@@ -12,11 +12,13 @@ router = APIRouter()
 
 @router.post("/upload-profile-picture/{id}")
 async def upload_profile_picture(id: str, file: UploadFile = File(...)):
-    return  await print(video_to_face_images('users', id, file))
+    result = await video_to_face_images('users', id, file)
+    print(result)
+    return result
 
-@router.post("/facial-recognition/{id}")
-async def post_user_dataset(id: str, file: UploadFile = File(...)):
-    return await recognition_manager('users', id)
+@router.post("/facial-recognition/{id}/{name}")
+async def post_user_dataset(id: str, name: str, file: UploadFile = File(...)):
+    return await recognition_manager('users', id, name)
     # return list_serial(users.find())
 
 # Get
