@@ -18,7 +18,7 @@ async def upload_profile_picture(id: str, file: UploadFile = File(...)):
 
 @router.post("/facial-recognition/{id}/{name}")
 async def post_user_dataset(id: str, name: str, file: UploadFile = File(...)):
-    return await recognition_manager('users', id, name)
+    return await recognition_manager('users', id, name, file)
     # return list_serial(users.find())
 
 # Get

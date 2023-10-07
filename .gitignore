@@ -3,6 +3,7 @@ env/
 
 # Compiled Python files
 __pycache__/
+helpers/__pycache__/
 
 # IDE and editor files
 .vscode/

@@ -1,5 +1,6 @@
 import boto3
 from fastapi import UploadFile
+import os
 from os import environ
 import io
 import numpy as np
@@ -62,17 +63,12 @@ def get_from_s3(dir: str, id: str):
                 img_array = np.frombuffer(file_stream.getvalue(), dtype=np.uint8)
                 img = cv.imdecode(img_array, cv.IMREAD_COLOR)
                 if img is not None:
+                    img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
                     images.append(img)
                 else:
                     print("Failed to decode image:", object.key)
             except Exception as e:
                 print("Failed to decode image:", object.key, "|", str(e))
-
-        cv.imshow('Image Window', images[5])
-
-        # Wait for a key event and close the window when a key is pressed
-        cv.waitKey(0)
-        cv.destroyAllWindows()
 
         # Retornamos las imagenes obtenidos
         return images

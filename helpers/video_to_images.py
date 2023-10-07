@@ -3,7 +3,6 @@ import cv2 as cv
 from fastapi import UploadFile, File
 from io import BytesIO
 import tempfile
-import numpy as np
 from PIL import Image
 
 from AWS.s3 import upload_to_s3
