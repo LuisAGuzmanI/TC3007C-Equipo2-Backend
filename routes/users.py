@@ -2,7 +2,7 @@ from fastapi import APIRouter, UploadFile, File
 
 from models.users import User
 from config.database import users
-from schema.schemas import list_serial
+from schema.schemas import list_serial, individual_serial
 from bson import ObjectId, is_valid
 
 from helpers.video_to_images import video_to_face_images
@@ -20,6 +20,10 @@ async def upload_profile_picture(id: str, file: UploadFile = File(...)):
 async def post_user_dataset(id: str, name: str, file: UploadFile = File(...)):
     return await recognition_manager('users', id, name, file)
     # return list_serial(users.find())
+
+@router.get("/by-id/{id}")
+async def get_user_by_id(id: str):
+    return individual_serial(users.find_one({'user_id': id}))
 
 # Get
 @router.get("/")
