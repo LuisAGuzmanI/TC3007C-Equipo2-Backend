@@ -1,29 +1,24 @@
 import os
 import cv2 as cv
 import numpy as np
+import requests
+from io import BytesIO
 
-def train_facial_recognizer_model():
-    haar_cascade = cv.CascadeClassifier('haar_face.xml')
+def train_facial_recognizer_model(images: list, name: str):
+    haar_cascade = cv.CascadeClassifier(cv.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
-    people = []
-    DIR = r'C:\Users\alber\Desktop\Alberto\Reto IA\OpenCV\Face Recognition\data\train'
-
-    for i in os.listdir(DIR):
-        people.append(i)
+    people = [name]
 
     features = []
     labels = []
 
     def create_train():
         for person in people:
-            path = os.path.join(DIR, person)
             label = people.index(person)
 
-            for img in os.listdir(path):
-                img_path = os.path.join(path, img)
+            for image in images:
 
-                img_array = cv.imread(img_path)
-                gray = cv.cvtColor(img_array, cv.COLOR_BGR2GRAY)
+                gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
 
                 faces_rect = haar_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=4)
 
@@ -35,7 +30,7 @@ def train_facial_recognizer_model():
     create_train()
     print('------------------- Training Done! -------------------')
 
-    features = np.array(features, dtype='object')
+    # features = np.array(features, dtype='object')
     labels = np.array(labels)
 
     face_recognizer = cv.face.LBPHFaceRecognizer.create()
@@ -43,6 +38,8 @@ def train_facial_recognizer_model():
     # Train the Recognizer on the feature list and the labels list
     face_recognizer.train(features, labels)
 
-    face_recognizer.save('face_trained.yml')
-    np.save('features.npy', features)
-    np.save('labels.npy', labels)
+    # face_recognizer.save('face_trained.yml')
+    # np.save('features.npy', features)
+    # np.save('labels.npy', labels)
+
+    return face_recognizer, labels

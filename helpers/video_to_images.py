@@ -3,7 +3,7 @@ import cv2 as cv
 from fastapi import UploadFile, File
 from io import BytesIO
 import tempfile
-import numpy as np
+from PIL import Image
 
 from AWS.s3 import upload_to_s3
 
@@ -51,7 +51,8 @@ async def video_to_face_images(dir: str, id: str, file: UploadFile = File(...)):
                 face_image = frame[y:y+h, x:x+w]
                 # Convertimos el arreglo de Numpy a BytesIO
                 image_bytes = BytesIO()
-                np.save(image_bytes, face_image)
+                image_pil = Image.fromarray(face_image)
+                image_pil.save(image_bytes, format='PNG')
                 # Resetear la posición inicial de BytesIO
                 image_bytes.seek(0)
                 # Incrementamos el contador de imágenes guardadas
