@@ -1,6 +1,6 @@
 # TC3007C-Equipo2-Backend
 
-## How to Run
+## Getting started
 
 ### Setting up a Local Environment
 
@@ -53,3 +53,6 @@ Access the API at `http://localhost:8000` in your web browser or via an API clie
 ## Environment Variables
 
 - `MONGO_URI`: URI for MongoDB database.
+- `AWS_ACCESS_KEY`: AWS IAM User Access Key.
+- `AWS_SECRET_KEY`: AWS IAM User Secreet Key.
+- `S3_BUCKET_NAME`: Name of AWS S3 Bucket.
