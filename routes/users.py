@@ -1,12 +1,14 @@
 from fastapi import APIRouter, UploadFile, File
 
-from models.users import User
+from models.users import User, Student
 from config.database import users
 from schema.schemas import list_serial, individual_serial
 from bson import ObjectId, is_valid
 
 from helpers.video_to_images import video_to_face_images
 from helpers.main_recognition import recognition_manager
+
+from typing import List
 
 router = APIRouter()
 
@@ -30,10 +32,20 @@ async def get_user_by_id(id: str):
 async def get_users_by_id(id: str):
     return individual_serial(users.find_one({'user_id': id}))
 
+@router.get("/get-students")
+async def get_students():
+    return list_serial(users.find({'role': 'student'}))
+
 # Post
 @router.post("/create-user")
 async def post_user(user: User):
     users.insert_one(dict(user))
+
+@router.post("/create-students")
+async def post_user(students: List[Student]):
+    for student in students:
+        print(student)
+        users.insert_one(dict(student))
 
 # Put
 @router.put("/{id}")

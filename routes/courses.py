@@ -1,7 +1,9 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, UploadFile, File
+import random
 
-from models.courses import Course
+from models.courses import Course, StudentClassData
 from config.database import courses
+from typing import List
 from schema.schemas import list_serial, individual_serial
 from bson import ObjectId
 
@@ -41,5 +43,42 @@ async def put_course(id: str, course: Course):
 @router.delete("/{id}")
 async def delete_course(id: str):
     courses.find_one_and_delete({"_id": ObjectId(id)})
+
+"""
+Metodos de clases
+"""
+# TODO: Hacer que esta información en lugar de ser random se genere con el reconocimiento de video
+@router.post("/add-class/{id}")
+async def post_course(id:str, date: str, file: UploadFile = File(...)):
+    course = individual_serial(courses.find_one({'_id': ObjectId(id)}))
+    _class = {
+        "date": date,
+        "attendance": 0,
+        "students": []
+    }
+
+    for student in course['students']:
+        participations = random.randint(0, 5)
+        attendance = random.random() < 0.8
+        attendance_increment = 1 if attendance else 0
+
+        courses.update_one(
+            { "_id": ObjectId(id), "students.user_id": student['user_id'] }, 
+            { 
+                "$inc": { "students.$.participations": participations, "students.$.attendance": attendance_increment }
+            }
+        )
+
+        student['participations'] = participations
+        student['attendance'] = attendance
+
+        _class['students'].append(student)
+
+    courses.update_one(
+        { "_id": ObjectId(id) },
+        {
+            "$push": { "classes": _class }
+        }
+    )
 
     
