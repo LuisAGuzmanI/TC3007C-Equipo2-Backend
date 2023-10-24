@@ -225,3 +225,68 @@ async def update_class_info(course_id: str, class_id: str, user_id: str, field: 
         raise HTTPException(status_code=404, detail=f"Class info was not updated")
     
     return {"message": "Student info was updated successfully."}, 200
+
+@router.get("/total-classes/{course_id}")
+async def get_total_classes(course_id: str):
+    # Define the query to find the course by its ID
+    query = {"_id": ObjectId(course_id)}
+
+    # Retrieve the course document
+    course = courses.find_one(query)
+
+    if course:
+        # Get the classes array and return its length
+        classes = course.get('classes', [])
+        return len(classes)
+    else:
+        HTTPException(status_code=404, detail=f"Course id is not valid")
+
+@router.get("/average-attendance/{course_id}")
+def get_average_attendance(course_id):
+    # Define the query to find the course by its ID
+    query = {"_id": ObjectId(course_id)}
+
+    # Retrieve the course document
+    course = courses.find_one(query)
+
+    if course:
+        # Get the classes array
+        classes = course.get('classes', [])
+
+        # Calculate total assistances and total number of classes
+        total_assistances = sum(cls['attendance'] for cls in classes)
+        total_classes = len(classes)
+
+        if total_classes > 0:
+            # Calculate and return the average
+            average_assistances = round(total_assistances / total_classes, 2)
+            return average_assistances
+        else:
+            return 0  # No classes available
+    else:
+        HTTPException(status_code=404, detail=f"Course id is not valid")
+
+@router.get("/average-participations/{course_id}")
+def get_average_participations(course_id):
+    # Define the query to find the course by its ID
+    query = {"_id": ObjectId(course_id)}
+
+    # Retrieve the course document
+    course = courses.find_one(query)
+
+    if course:
+        # Get the classes array
+        classes = course.get('classes', [])
+
+        # Calculate total assistances and total number of classes
+        total_participations = sum(cls['participations'] for cls in classes)
+        total_classes = len(classes)
+
+        if total_classes > 0:
+            # Calculate and return the average
+            average_assistances = round(total_participations / total_classes, 2)
+            return average_assistances
+        else:
+            return 0  # No classes available
+    else:
+        HTTPException(status_code=404, detail=f"Course id is not valid")
