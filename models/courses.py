@@ -22,4 +22,5 @@ class Course(BaseModel):
     professor: User
     location: str
     name: str
+    emoji: str
     classes: List[Class]

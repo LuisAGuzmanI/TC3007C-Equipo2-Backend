@@ -290,3 +290,44 @@ def get_average_participations(course_id):
             return 0  # No classes available
     else:
         HTTPException(status_code=404, detail=f"Course id is not valid")
+
+@router.get("/courses-by-student/{student_id}")
+def get_courses_by_student(student_id):
+    # Define the query to find the course by its ID
+    query = {"students.user_id": student_id}
+
+    # Retrieve the course document
+    found_courses = courses.find(query)
+
+    results = []
+
+    if found_courses:
+        for course in found_courses:
+            course_id = str(course['_id'])
+            total_attendance = 0
+            total_participations = 0
+
+            # Iterate over classes in the course
+            for class_info in course.get('classes', []):
+                # Iterate over students in the class
+                for student_info in class_info.get('students', []):
+                    if student_info['user_id'] == student_id:
+                        # Accumulate attendances and participations
+                        total_attendance += 1 if student_info['attendance'] else 0
+                        total_participations += student_info['participations']
+
+            # Add results to the dictionary
+            results.append({
+                'total_attendance': total_attendance,
+                'total_participations': total_participations,
+                'course_id': course_id,
+                'course_name': course['name'],
+                'course_location': course['location'],
+                'course_emoji': course['emoji'],
+                'course_professor': course['professor']['name'],
+            })
+
+        return results
+    else:
+        HTTPException(status_code=404, detail=f"The student was not found in any course")
+
