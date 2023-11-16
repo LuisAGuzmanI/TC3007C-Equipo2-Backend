@@ -11,7 +11,8 @@ origins = [
     "http://localhost",
     "http://localhost:5173",  # Development enviorment
     "http://localhost:4173",  # Build preview enviorment
-    "https://main.d2qq7id2kqiuhj.amplifyapp.com",  # Production delopyment
+    "http://127.0.0.1:8000",  # Production backend gateway delopyment
+    "https://main.d2qq7id2kqiuhj.amplifyapp.com",  # Production frontend delopyment
 ]
 
 app.add_middleware(
