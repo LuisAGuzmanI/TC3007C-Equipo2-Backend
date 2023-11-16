@@ -12,6 +12,7 @@ helpers/__pycache__/
 
 # Environment variables
 .env
+classroom-ai-key.pem
 
 # Logs
 logs/
