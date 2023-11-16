@@ -9,7 +9,9 @@ app = FastAPI()
 
 origins = [
     "http://localhost",
-    "http://localhost:5173",  # Add the URL of your Vue.js application
+    "http://localhost:5173",  # Development enviorment
+    "http://localhost:4173",  # Build preview enviorment
+    "https://main.d2qq7id2kqiuhj.amplifyapp.com",  # Production delopyment
 ]
 
 app.add_middleware(
