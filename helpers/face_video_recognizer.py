@@ -1,15 +1,8 @@
-import os
-import cv2 as cv
-import numpy as np
+import cv2
+import face_recognition
 import tempfile
 
-async def face_video_recognizer(face_recognizer, labels, input_video, name):
-    # Cargamos el clasificador pre-entrenado de rostros
-    haar_cascade = cv.CascadeClassifier(cv.data.haarcascades + 'haarcascade_frontalface_default.xml')
-
-    # Creamos una lista de nombres de personas
-    people = [name]
-
+async def assistance_system(people, known_face_encodings, input_video):
     # Convertir el UploadFile a formato de bytes
     video_bytes = await input_video.read()
 
@@ -20,63 +13,54 @@ async def face_video_recognizer(face_recognizer, labels, input_video, name):
     # Obtenemos el nombre de archivo del video temporal
     temp_video_path = temp_video_file.name
 
-    # Cargamos la captura de video de OpenCV
-    cap = cv.VideoCapture(temp_video_path)
+    cap = cv2.VideoCapture(temp_video_path)
 
-    # Obtenemos las propiedades del video
-    # fps = int(cap.get(cv.CAP_PROP_FPS))
-    # width = int(cap.get(cv.CAP_PROP_FRAME_WIDTH))
-    # height = int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))
-
-    # Obtenemos el nombre del video original sin la extensión de la ruta
-    # video_name = os.path.splitext(os.path.basename(input_video))[0]
-
-    # Definimos el codec y creamos un objeto VideoWriter
-    # fourcc = cv.VideoWriter.fourcc(*'XVID')
-    # output_file_name = f'{output_path}\output_{video_name}.avi'
-    # out = cv.VideoWriter(output_file_name, fourcc, fps, (width, height))
-
-    while True:
-        # Leemos un frame de la captura de video
+    while cap.isOpened():
         ret, frame = cap.read()
-
         if not ret:
             break
 
-        # Convertimos el frame a escala de grises para reconocimiento facial
-        gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+        # Find all face locations and face encodings in the current frame
+        face_locations = face_recognition.face_locations(frame)
+        face_encodings = face_recognition.face_encodings(frame, face_locations)
 
-        # Detectamos posibles rostros en el frame
-        faces_rect = haar_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=4)
+        # Process each face in the frame
+        for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
+            # Check if the face matches any of the known persons
+            matches = face_recognition.compare_faces(known_face_encodings, face_encoding, tolerance=0.5)
+            name = "Unknown"
 
-        for (x, y, w, h) in faces_rect:
-            # Extraemos la región de interés del rostro (face ROI)
-            faces_roi = gray[y:y + h, x:x + w]
+            if True in matches:
+                first_match_index = matches.index(True)
+                person = people[first_match_index]
+                name = person.name
 
-            # Reconocemos el rostro
-            label, confidence = face_recognizer.predict(faces_roi)
+                if person.name != "Unknown" and not person.assistance:
+                    # Log attendance
+                    # with open("attendance_log.txt", "a") as log_file:
+                    #     log_file.write(f"{name} - {datetime.now()}\n")
 
-            # Verificamos si el nivel de confianza se encuentra debajo del límite (se ajusta conforme se necesite)
-            if confidence < 100:
-                name = people[label]
-            else:
-                name = "Unknown"
+                    # Mark attendance as taken
+                    person.assistance = True
 
-            # Draw a rectangle around the face and display the name
-            cv.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), thickness=2)
-            cv.putText(frame, name, (x, y - 10), cv.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), thickness=2)
+            # Draw rectangle around the face
+            cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
 
-        # Escribimos el frame correspondiente con los rostros reconocidos
-        # out.write(frame)
+            # Draw label
+            font = cv2.FONT_HERSHEY_DUPLEX
+            cv2.putText(frame, name, (left + 6, bottom - 6), font, 0.5, (255, 255, 255), 1)
 
-        # Desplegamos el frame con las caras reconocidas
-        cv.imshow('Face Recognition', frame)
 
-        # Rompemos el ciclo cuando se presione la tecla 'q'
-        if cv.waitKey(1) & 0xFF == ord('q'):
+        # Display the frame with counters for each person
+        for idx, person in enumerate(people):
+            cv2.putText(frame, f"{person.name} Assistance: {person.assistance}", (10, 30 * (idx + 1)), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
+        cv2.imshow('Face Detection', frame)
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-    # Liberamos la captura de video y cerramos todas las ventanas de OpenCV
     cap.release()
-    # out.release()
-    cv.destroyAllWindows()
+    cv2.destroyAllWindows()
+
+    return people
