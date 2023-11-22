@@ -51,6 +51,11 @@ async def post_user_dataset(id: str, name: str, file: UploadFile = File(...)):
     return await recognition_manager('users', id, name, file)
     # return list_serial(users.find())
 
+
+@router.get("/all")
+async def get_all_users():
+    return list_serial(users.find())
+
 @router.get("/by-id/{id}")
 async def get_user_by_id(id: str):
     return individual_serial(users.find_one({'user_id': id}))
