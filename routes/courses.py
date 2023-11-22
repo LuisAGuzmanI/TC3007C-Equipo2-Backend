@@ -115,7 +115,85 @@ async def post_class(id:str, date: str, file: UploadFile = File(...)):
         }
     )
 
+@router.get("/get-class-by-ids/{course_id}/{class_id}")
+def get_class_by_ids(course_id, class_id):
     
+    # Retrieve the class by its IDs
+    course = courses.find_one(
+        {"_id": ObjectId(course_id), "classes": { "$elemMatch": {"id": class_id} }},
+    )
+
+    print(course)
+
+    if course:
+        return course["classes"][0]
+    else:
+        raise HTTPException(status_code=404, detail=f"Class was not found")
+    
+@router.get("/get-class-students-by-ids/{course_id}/{class_id}/{student_id}")
+def get_student_by_ids(course_id, class_id, student_id):
+
+
+    course = courses.find_one(
+        {"_id": ObjectId(course_id), "classes": { "$elemMatch": {"id": class_id} }},
+    )
+
+    target_student = False
+
+    for student in course["classes"][0]["students"]:
+        if student_id == student["user_id"]:
+            target_student = student
+
+    print(target_student)
+
+    if target_student:
+        return target_student;
+    else:
+        raise HTTPException(status_code=404, detail=f"Class was not found")
+
+
+@router.put("/update-class-data/{course_id}/{class_id}/{date}")
+async def update_course_data(course_id: str, class_id: str, date: str):
+
+    # Extract the date and time without timezone information
+    date_str_no_timezone = date[:24]
+
+    # Parse the date string
+    date_obj = datetime.strptime(date_str_no_timezone, "%a %b %d %Y %H:%M:%S")
+
+    # # Format the date as dd/mm/yyyy
+    formatted_date = date_obj.strftime("%d/%m/%Y")
+
+    updated_class = courses.update_one(
+        {"_id": ObjectId(course_id), "classes": { "$elemMatch": {"id": class_id} }},
+        {"$set": {"classes.$.date": formatted_date}}
+    )
+
+    if updated_class.modified_count < 1 :
+        raise HTTPException(status_code=404, detail=f"Course data was not updated")
+    else:
+        return { "message": "Success!" }
+
+@router.put("/update-course-data/{course_id}/{name}/{location}/{emoji}")
+async def update_course_data(course_id: str, name: str, location: str, emoji: str):
+
+    updated_course = courses.update_one(
+    {"_id": ObjectId(course_id)},
+    {
+        "$set": {
+            "name": name,
+            "location": location,
+            "emoji": emoji
+        }
+    })
+
+    if updated_course.modified_count < 1 :
+        raise HTTPException(status_code=404, detail=f"Course data was not updated")
+    else:
+        return { "message": "Success!" }
+    
+    
+
 @router.put("/update-class-info/{course_id}/{class_id}/{user_id}/{field}/{value}")
 async def update_class_info(course_id: str, class_id: str, user_id: str, field: str, value: int):
 
