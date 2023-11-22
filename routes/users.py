@@ -1,12 +1,16 @@
-from fastapi import APIRouter, UploadFile, File
+from fastapi import APIRouter, UploadFile, File, HTTPException
 
-from models.users import User, Student
+from project_models.users import User, Student
 from config.database import users
 from schema.schemas import list_serial, individual_serial
 from bson import ObjectId, is_valid
 
-from helpers.video_to_images import video_to_face_images
 from helpers.main_recognition import recognition_manager
+from AWS.s3 import s3_upload
+
+import os
+from PIL import Image
+from io import BytesIO
 
 from typing import List
 
@@ -14,9 +18,33 @@ router = APIRouter()
 
 @router.post("/upload-profile-picture/{id}")
 async def upload_profile_picture(id: str, file: UploadFile = File(...)):
-    result = await video_to_face_images('users', id, file)
-    print(result)
-    return result
+
+    if not file:
+        raise HTTPException(
+            status_code=400,
+            detail="No file found!!"
+        )
+
+    contents = await file.read()
+
+    SUPPORTED_FILE_TYPES = {
+        'image/png': 'png'
+    }
+
+    _, file_type = os.path.splitext(file.filename)
+
+    if file_type not in SUPPORTED_FILE_TYPES:
+        img = Image.open(BytesIO(contents))
+
+        output_buffer = BytesIO()
+        img.save(output_buffer, format="PNG")
+        contents = output_buffer.getvalue()
+
+    file_path = f'users/{id}/{id}.png'
+
+    results = await s3_upload(dir='users', key=file_path, contents=contents)
+
+    print(results)
 
 @router.post("/facial-recognition/{id}/{name}")
 async def post_user_dataset(id: str, name: str, file: UploadFile = File(...)):

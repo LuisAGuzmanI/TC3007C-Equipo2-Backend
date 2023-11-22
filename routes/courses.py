@@ -1,12 +1,14 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 import random
 
-from models.courses import Course, StudentClassData
+from project_models.courses import Course, StudentClassData
 from config.database import courses
 from typing import List
 from schema.schemas import list_serial, individual_serial
 from bson import ObjectId
 from datetime import datetime
+
+from helpers.main_recognition import recognition_manager
 
 router = APIRouter()
 
@@ -52,6 +54,24 @@ Metodos de clases
 @router.post("/add-class/{id}/{date}")
 async def post_class(id:str, date: str, file: UploadFile = File(...)):
     course = individual_serial(courses.find_one({'_id': ObjectId(id)}))
+
+    students_data = {
+        'person_1' : {
+            'id': 1,
+            'name': 'Alberto Orozco',
+        },
+        'person_2' : {
+            'id': 2,
+            'name': 'Alonso Orozco',
+        }
+    }
+
+    students_results = await recognition_manager(students_data, file)
+
+    print(students_results)
+
+    raise HTTPException(status_code=404, detail=f"Early termination. TEST")
+
     
     # Extract the date and time without timezone information
     date_str_no_timezone = date[:24]
