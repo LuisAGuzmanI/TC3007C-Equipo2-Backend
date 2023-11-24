@@ -32,7 +32,7 @@ async def recognition_manager(data, file):
 
     people = await participation_system(people, known_face_encodings, file)
 
-    people_data = []
+    people_data = {}
 
     for person in people:
         person_info = {
@@ -42,6 +42,6 @@ async def recognition_manager(data, file):
             'participations': person.participations
         }
 
-        people_data.append(person_info)
+        people_data[person.id] = person_info
 
     return people_data

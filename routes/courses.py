@@ -55,23 +55,39 @@ Metodos de clases
 async def post_class(id:str, date: str, file: UploadFile = File(...)):
     course = individual_serial(courses.find_one({'_id': ObjectId(id)}))
 
-    students_data = {
-        'person_1' : {
-            'id': 1,
-            'name': 'Alberto Orozco',
-        },
-        'person_2' : {
-            'id': 2,
-            'name': 'Alonso Orozco',
+    students_data = {}
+    for student in course["students"]:
+        students_data[student["user_id"]] = {
+            "id": student["user_id"],
+            "name": student["name"],
         }
-    }
 
     students_results = await recognition_manager(students_data, file)
 
+    # students_results = {
+    #     '357d4d5d-da2c-4037-b081-685374782c59': {
+    #         'name': 'Alberto Orozco', 
+    #         'id': '357d4d5d-da2c-4037-b081-685374782c59', 
+    #         'attendance': True, 
+    #         'participations': 2
+    #     }, 
+    #     'd426fdcf-f6e6-417d-a636-c35079fd727f': {
+    #         'name': 'Julian', 
+    #         'id': 'd426fdcf-f6e6-417d-a636-c35079fd727f', 
+    #         'attendance': False, 
+    #         'participations': 0
+    #     }, 
+    #     'f428a4a8-90f1-704c-3c39-1f44233bbb6d': {
+    #         'name': 'Luis A. Guzmán Iribe', 
+    #         'id': 'f428a4a8-90f1-704c-3c39-1f44233bbb6d', 
+    #         'attendance': True, 
+    #         'participations': 2
+    #     }
+    # }
+    
     print(students_results)
 
-    raise HTTPException(status_code=404, detail=f"Early termination. TEST")
-
+    # raise HTTPException(status_code=404, detail=f"Early termination. TEST")
     
     # Extract the date and time without timezone information
     date_str_no_timezone = date[:24]
@@ -91,8 +107,8 @@ async def post_class(id:str, date: str, file: UploadFile = File(...)):
     }
 
     for student in course['students']:
-        participations = random.randint(0, 5)
-        attendance = random.random() < 0.8
+        participations = students_results[student['user_id']]['participations']
+        attendance = students_results[student['user_id']]['attendance']
         attendance_increment = 1 if attendance else 0
         courses.update_one(
             { "_id": ObjectId(id), "students.user_id": student['user_id'] }, 

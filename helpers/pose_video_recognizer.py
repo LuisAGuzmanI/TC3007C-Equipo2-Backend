@@ -35,6 +35,36 @@ async def participation_system(people, known_face_encodings, input_video):
             print("Frame is None. Exiting.")
             break
 
+        # Find all face locations and face encodings in the current frame
+        face_locations = face_recognition.face_locations(frame)
+        face_encodings = face_recognition.face_encodings(frame, face_locations)
+
+        # Process each face in the frame
+        for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
+            # Check if the face matches any of the known persons
+            matches = face_recognition.compare_faces(known_face_encodings, face_encoding, tolerance=0.5)
+            name = "Unknown"
+
+            if True in matches:
+                first_match_index = matches.index(True)
+                person = people[first_match_index]
+                name = person.name
+
+                if person.name != "Unknown" and not person.assistance:
+                    # Log attendance
+                    # with open("attendance_log.txt", "a") as log_file:
+                    #     log_file.write(f"{name} - {datetime.now()}\n")
+
+                    # Mark attendance as taken
+                    person.assistance = True
+
+            # Draw rectangle around the face
+            cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
+
+            # Draw label
+            font = cv2.FONT_HERSHEY_DUPLEX
+            cv2.putText(frame, name, (left + 6, bottom - 6), font, 0.5, (255, 255, 255), 1)
+
         # Perform object detection on the frame
         results = yolov5.predict(frame, size=640, augment=False)
         detections = results.pred[0]
@@ -123,7 +153,7 @@ async def participation_system(people, known_face_encodings, input_video):
                 cv2.FONT_HERSHEY_DUPLEX, 0.5, (255, 0, 0), 1)
 
         # Display the frame
-        cv2.imshow("Video", frame)
+        # cv2.imshow("Video", frame)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
