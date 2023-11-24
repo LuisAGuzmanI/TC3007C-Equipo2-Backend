@@ -106,7 +106,7 @@ sounddevice==0.4.6
 stack-data==0.6.3
 starlette==0.27.0
 supervision==0.11.0
-sympy==1.12
+sympy==1.10.1
 tensorboard==2.15.1
 tensorboard-data-server==0.7.2
 termcolor==2.3.0
