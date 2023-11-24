@@ -119,7 +119,7 @@ tqdm==4.66.1
 traitlets==5.9.0
 typing_extensions==4.7.1
 tzdata==2023.3
-ultralytics==8.0.215
+ultralytics==8.0.151
 urllib3==1.26.17
 uvicorn==0.22.0
 wcwidth==0.2.8
