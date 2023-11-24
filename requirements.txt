@@ -55,7 +55,7 @@ mediapipe==0.9.0.1
 mpmath==1.3.0
 nest-asyncio==1.5.8
 networkx==2.6.3
-numpy==1.23.5
+numpy==1.21.6
 oauthlib==3.2.2
 opencv-contrib-python==4.8.1.78
 opencv-python==4.7.0.72
